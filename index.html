@@ -221,11 +221,14 @@
 
         .etapa {
             display: inline-block;
-            background: #eceff1;
-            padding: 5px 9px;
-            border-radius: 5px;
-            margin: 2px;
-            font-size: 0.85rem;
+            background: #e3f2fd;
+            color: #0d47a1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 4px;
+            font-size: 1.05rem;
+            font-weight: bold;
+            border: 1px solid #bbdefb;
         }
 
         footer {
@@ -269,7 +272,7 @@
 
             <span class="etapa">1. Medir a massa</span>
             <span class="etapa">2. Medir o volume</span>
-            <span class="etapa">3. Calcular $\rho$</span>
+            <span class="etapa">3. Calcular a Massa Específica</span>
             <span class="etapa">4. Identificar</span>
             <span class="etapa">5. Investigar o empuxo</span>
         </div>
@@ -500,12 +503,12 @@
 let materialAtual;
 
 let corpo = {
-    x: 330,
-    y: 430,
+    x: 525,
+    y: 480,
     tamanho: 60,
     arrastando: false,
-    origemX: 330,
-    origemY: 430,
+    origemX: 525,
+    origemY: 480,
     local: "bancada"
 };
 
@@ -632,8 +635,9 @@ function iniciarExperimento() {
     volumeMedido = false;
     identificacaoFeita = false;
 
-    corpo.x = 330;
-    corpo.y = 430;
+    // Reposiciona o corpo entre a balança e a proveta
+    corpo.x = 525;
+    corpo.y = 480;
     corpo.arrastando = false;
     corpo.local = "bancada";
 
@@ -1203,7 +1207,6 @@ function mouseReleased() {
         corpo.y < 500
     ) {
         
-        // CORREÇÃO: Posição x corrigida para 730 (centro da proveta) e y para 475 (no fundo)
         corpo.x = 730; 
 
         corpo.y = 475;
@@ -1241,10 +1244,11 @@ function mouseReleased() {
     // -----------------------------------------------
 
     else {
+        
+        // Reposiciona na bancada entre os dois
+        corpo.x = 525;
 
-        corpo.x = 500;
-
-        corpo.y = 450;
+        corpo.y = 480;
 
         corpo.local = "bancada";
 
