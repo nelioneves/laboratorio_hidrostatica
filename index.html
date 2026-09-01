@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Laboratório Virtual - Massa Específica e Empuxo</title>
+    
+    <!-- Ícone da aba do navegador (Favicon) -->
+    <link rel="icon" type="image/png" href="favicon.png">
 
     <!-- p5.js -->
     <script src="https://cdn.jsdelivr.net/npm/p5@1.11.7/lib/p5.min.js"></script>
@@ -37,6 +40,12 @@
             margin: 6px 0 0;
             font-size: 0.95rem;
             opacity: 0.9;
+        }
+        
+        .autor {
+            font-size: 0.85rem;
+            color: #b0bec5;
+            margin-top: 5px;
         }
 
         .layout {
@@ -243,6 +252,7 @@
 <header>
     <h1>Laboratório Virtual de Hidrostática</h1>
     <p>Massa Específica e Empuxo</p>
+    <p class="autor">Desenvolvido por Prof. Me. Nélio Neves Lima</p>
 </header>
 
 <div class="layout">
@@ -482,9 +492,8 @@
 </div>
 
 <footer>
-    Laboratório Virtual de Física — Massa Específica e Empuxo
+    Laboratório Virtual de Física — Massa Específica e Empuxo | Prof. Me. Nélio Neves Lima
 </footer>
-
 
 <script>
 
@@ -1193,10 +1202,11 @@ function mouseReleased() {
         corpo.y > 100 &&
         corpo.y < 500
     ) {
+        
+        // CORREÇÃO: Posição x corrigida para 730 (centro da proveta) e y para 475 (no fundo)
+        corpo.x = 730; 
 
-        corpo.x = 785;
-
-        corpo.y = 330;
+        corpo.y = 475;
 
         corpo.local = "proveta";
 
