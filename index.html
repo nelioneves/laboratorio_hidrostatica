@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Laboratório Virtual - Massa Específica e Empuxo</title>
+
+    <!-- p5.js -->
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.7/lib/p5.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #eef2f5;
+            color: #20252a;
+        }
+
+        header {
+            background: #263238;
+            color: white;
+            padding: 18px 24px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.6rem;
+        }
+
+        header p {
+            margin: 6px 0 0;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .layout {
+            max-width: 1250px;
+            margin: 20px auto;
+            padding: 0 16px;
+        }
+
+        .laboratorio {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+        }
+
+        #canvas-container {
+            width: 100%;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            height: auto !important;
+        }
+
+        .painel {
+            margin-top: 16px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 1.15rem;
+        }
+
+        .dados {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .campo {
+            background: #f1f3f4;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .campo strong {
+            display: block;
+            font-size: 0.82rem;
+            color: #5f6368;
+            margin-bottom: 4px;
+        }
+
+        .campo span {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .formulario {
+            display: grid;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 0.92rem;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #b8c0c7;
+            border-radius: 7px;
+            font-size: 1rem;
+            background: white;
+        }
+
+        button {
+            border: 0;
+            border-radius: 7px;
+            padding: 12px 16px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            background: #37474f;
+            color: white;
+            margin-top: 4px;
+        }
+
+        button:hover {
+            background: #263238;
+        }
+
+        button.secundario {
+            background: #607d8b;
+        }
+
+        button.secundario:hover {
+            background: #455a64;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .resultado {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #f1f3f4;
+            min-height: 45px;
+            line-height: 1.45;
+        }
+
+        .sucesso {
+            background: #e8f5e9;
+            border-left: 5px solid #2e7d32;
+        }
+
+        .erro {
+            background: #ffebee;
+            border-left: 5px solid #c62828;
+        }
+
+        .info {
+            background: #e3f2fd;
+            border-left: 5px solid #1565c0;
+        }
+
+        .teoria {
+            margin-top: 16px;
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .teoria h2 {
+            margin-top: 0;
+        }
+
+        .formula {
+            text-align: center;
+            font-size: 1.3rem;
+            padding: 12px;
+            margin: 10px 0;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .instrucoes {
+            margin-bottom: 15px;
+            padding: 14px;
+            background: #fff8e1;
+            border-left: 5px solid #ffb300;
+            border-radius: 6px;
+            line-height: 1.5;
+        }
+
+        .etapa {
+            display: inline-block;
+            background: #eceff1;
+            padding: 5px 9px;
+            border-radius: 5px;
+            margin: 2px;
+            font-size: 0.85rem;
+        }
+
+        footer {
+            text-align: center;
+            color: #687078;
+            padding: 25px 10px;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 800px) {
+            .painel {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Laboratório Virtual de Hidrostática</h1>
+    <p>Massa Específica e Empuxo</p>
+</header>
+
+<div class="layout">
+
+    <div class="laboratorio">
+
+        <div class="instrucoes">
+            <strong>Desafio experimental:</strong><br>
+            Você recebeu um corpo de prova de material desconhecido.
+            Utilize a balança e a proveta para determinar sua massa e seu
+            volume. Depois, calcule a massa específica e identifique o
+            material entre as opções disponíveis.
+            <br><br>
+
+            <span class="etapa">1. Medir a massa</span>
+            <span class="etapa">2. Medir o volume</span>
+            <span class="etapa">3. Calcular $\rho$</span>
+            <span class="etapa">4. Identificar</span>
+            <span class="etapa">5. Investigar o empuxo</span>
+        </div>
+
+        <div id="canvas-container"></div>
+
+    </div>
+
+    <div class="painel">
+
+        <!-- DADOS EXPERIMENTAIS -->
+        <div class="card">
+
+            <h2>Dados experimentais</h2>
+
+            <div class="dados">
+
+                <div class="campo">
+                    <strong>Massa</strong>
+                    <span id="massa-display">---</span>
+                </div>
+
+                <div class="campo">
+                    <strong>Volume inicial</strong>
+                    <span id="volume-inicial-display">50 mL</span>
+                </div>
+
+                <div class="campo">
+                    <strong>Volume final</strong>
+                    <span id="volume-final-display">---</span>
+                </div>
+
+                <div class="campo">
+                    <strong>Volume deslocado</strong>
+                    <span id="volume-deslocado-display">---</span>
+                </div>
+
+            </div>
+
+            <div class="resultado info" id="status">
+                Arraste o corpo de prova até a balança para começar.
+            </div>
+
+        </div>
+
+        <!-- IDENTIFICAÇÃO -->
+        <div class="card">
+
+            <h2>Identificação do material</h2>
+
+            <div class="formulario">
+
+                <label for="densidade-input">
+                    Sua massa específica calculada (g/cm³):
+                </label>
+
+                <input
+                    type="number"
+                    id="densidade-input"
+                    step="0.01"
+                    min="0"
+                    placeholder="Ex.: 7,87"
+                >
+
+                <label for="material-select">
+                    Qual é o material do corpo de prova?
+                </label>
+
+                <select id="material-select">
+                    <option value="">Selecione...</option>
+                </select>
+
+                <button id="verificar-btn">
+                    Verificar identificação
+                </button>
+
+                <button
+                    id="novo-btn"
+                    class="secundario">
+                    Novo experimento
+                </button>
+
+                <div class="resultado" id="resultado-identificacao">
+                    Faça as medições antes de identificar o material.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- EMPUXO -->
+    <div class="card">
+
+        <h2>Investigação do empuxo</h2>
+
+        <p>
+            Depois de determinar a massa e o volume do corpo, investigue
+            o empuxo exercido pela água.
+        </p>
+
+        <div class="dados">
+
+            <div class="campo">
+                <strong>Peso do corpo</strong>
+                <span id="peso-display">---</span>
+            </div>
+
+            <div class="campo">
+                <strong>Empuxo</strong>
+                <span id="empuxo-display">---</span>
+            </div>
+
+            <div class="campo">
+                <strong>Força resultante</strong>
+                <span id="resultante-display">---</span>
+            </div>
+
+            <div class="campo">
+                <strong>Comportamento</strong>
+                <span id="comportamento-display">---</span>
+            </div>
+
+        </div>
+
+        <button id="empuxo-btn">
+            Calcular empuxo
+        </button>
+
+        <div class="resultado" id="resultado-empuxo">
+            Primeiro determine a massa e o volume do corpo.
+        </div>
+
+    </div>
+
+    <!-- REGISTRO -->
+    <div class="card">
+
+        <h2>Registro do experimento</h2>
+
+        <p>
+            Utilize os dados observados para preencher a tabela da sua
+            atividade ou da Lista Norteadora.
+        </p>
+
+        <div class="dados">
+
+            <div class="campo">
+                <strong>Material identificado</strong>
+                <span id="registro-material">---</span>
+            </div>
+
+            <div class="campo">
+                <strong>Massa específica</strong>
+                <span id="registro-densidade">---</span>
+            </div>
+
+            <div class="campo">
+                <strong>Volume do corpo</strong>
+                <span id="registro-volume">---</span>
+            </div>
+
+            <div class="campo">
+                <strong>Empuxo</strong>
+                <span id="registro-empuxo">---</span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TEORIA -->
+    <div class="teoria">
+
+        <h2>Referência teórica</h2>
+
+        <p>
+            A massa específica relaciona a massa de uma substância com o
+            volume ocupado por ela:
+        </p>
+
+        <div class="formula">
+            ρ = m / V
+        </div>
+
+        <p>
+            Quando um corpo é completamente mergulhado em um líquido,
+            ele desloca um volume de líquido igual ao volume submerso do
+            corpo. Esse deslocamento permite determinar seu volume.
+        </p>
+
+        <p>
+            O empuxo é a força exercida pelo fluido sobre o corpo e,
+            pelo Princípio de Arquimedes, é igual ao peso do fluido
+            deslocado:
+        </p>
+
+        <div class="formula">
+            E = ρ<sub>f</sub> · g · V<sub>d</sub>
+        </div>
+
+        <p>
+            Para analisar o comportamento do corpo, compare seu peso
+            com o empuxo:
+        </p>
+
+        <div class="formula">
+            P = m · g
+        </div>
+
+        <div class="formula">
+            P &gt; E → afunda &nbsp;&nbsp;&nbsp;
+            P = E → equilíbrio &nbsp;&nbsp;&nbsp;
+            P &lt; E → sobe
+        </div>
+
+    </div>
+
+</div>
+
+<footer>
+    Laboratório Virtual de Física — Massa Específica e Empuxo
+</footer>
+
+
+<script>
+
+let materialAtual;
+
+let corpo = {
+    x: 330,
+    y: 430,
+    tamanho: 60,
+    arrastando: false,
+    origemX: 330,
+    origemY: 430,
+    local: "bancada"
+};
+
+const VOLUME_INICIAL = 50; // mL
+
+const materiais = [
+
+    {
+        nome: "Magnésio",
+        simbolo: "Mg",
+        densidade: 1.74
+    },
+
+    {
+        nome: "Alumínio",
+        simbolo: "Al",
+        densidade: 2.70
+    },
+
+    {
+        nome: "Titânio",
+        simbolo: "Ti",
+        densidade: 4.51
+    },
+
+    {
+        nome: "Zinco",
+        simbolo: "Zn",
+        densidade: 7.14
+    },
+
+    {
+        nome: "Estanho",
+        simbolo: "Sn",
+        densidade: 7.31
+    },
+
+    {
+        nome: "Ferro",
+        simbolo: "Fe",
+        densidade: 7.87
+    },
+
+    {
+        nome: "Cobre",
+        simbolo: "Cu",
+        densidade: 8.96
+    },
+
+    {
+        nome: "Prata",
+        simbolo: "Ag",
+        densidade: 10.49
+    },
+
+    {
+        nome: "Chumbo",
+        simbolo: "Pb",
+        densidade: 11.34
+    },
+
+    {
+        nome: "Ouro",
+        simbolo: "Au",
+        densidade: 19.32
+    }
+
+];
+
+let volumeCorpo;
+let massaCorpo;
+
+let massaMedida = false;
+let volumeMedido = false;
+let identificacaoFeita = false;
+
+
+/* --------------------------------------------------
+   CONFIGURAÇÃO DA SIMULAÇÃO
+-------------------------------------------------- */
+
+function setup() {
+
+    let canvas = createCanvas(1100, 650);
+
+    canvas.parent("canvas-container");
+
+    iniciarExperimento();
+
+}
+
+
+/* --------------------------------------------------
+   NOVO EXPERIMENTO
+-------------------------------------------------- */
+
+function iniciarExperimento() {
+
+    materialAtual =
+        materiais[
+            floor(random(materiais.length))
+        ];
+
+    /*
+       Volume aleatório entre 6 e 18 cm³.
+       Como 1 cm³ = 1 mL, o volume deslocado
+       pode ser lido diretamente na proveta.
+    */
+
+    volumeCorpo = floor(random(6, 19));
+
+    /*
+       Massa calculada a partir da massa específica.
+       Pequena precisão experimental simulada.
+    */
+
+    massaCorpo =
+        materialAtual.densidade * volumeCorpo;
+
+    massaCorpo =
+        round(massaCorpo * 10) / 10;
+
+    massaMedida = false;
+    volumeMedido = false;
+    identificacaoFeita = false;
+
+    corpo.x = 330;
+    corpo.y = 430;
+    corpo.arrastando = false;
+    corpo.local = "bancada";
+
+    document.getElementById(
+        "massa-display"
+    ).textContent = "---";
+
+    document.getElementById(
+        "volume-final-display"
+    ).textContent = "---";
+
+    document.getElementById(
+        "volume-deslocado-display"
+    ).textContent = "---";
+
+    document.getElementById(
+        "densidade-input"
+    ).value = "";
+
+    document.getElementById(
+        "material-select"
+    ).value = "";
+
+    document.getElementById(
+        "resultado-identificacao"
+    ).className = "resultado";
+
+    document.getElementById(
+        "resultado-identificacao"
+    ).textContent =
+        "Faça as medições antes de identificar o material.";
+
+    document.getElementById(
+        "peso-display"
+    ).textContent = "---";
+
+    document.getElementById(
+        "empuxo-display"
+    ).textContent = "---";
+
+    document.getElementById(
+        "resultante-display"
+    ).textContent = "---";
+
+    document.getElementById(
+        "comportamento-display"
+    ).textContent = "---";
+
+    document.getElementById(
+        "resultado-empuxo"
+    ).className = "resultado";
+
+    document.getElementById(
+        "resultado-empuxo"
+    ).textContent =
+        "Primeiro determine a massa e o volume do corpo.";
+
+    document.getElementById(
+        "registro-material"
+    ).textContent = "---";
+
+    document.getElementById(
+        "registro-densidade"
+    ).textContent = "---";
+
+    document.getElementById(
+        "registro-volume"
+    ).textContent = "---";
+
+    document.getElementById(
+        "registro-empuxo"
+    ).textContent = "---";
+
+    document.getElementById(
+        "status"
+    ).className = "resultado info";
+
+    document.getElementById(
+        "status"
+    ).textContent =
+        "Arraste o corpo de prova até a balança para começar.";
+
+}
+
+
+/* --------------------------------------------------
+   DESENHO
+-------------------------------------------------- */
+
+function draw() {
+
+    background(238, 242, 245);
+
+    desenharBancada();
+
+    desenharBalanca();
+
+    desenharProveta();
+
+    desenharCorpo();
+
+    desenharInstrucoesCanvas();
+
+}
+
+
+/* --------------------------------------------------
+   BANCADA
+-------------------------------------------------- */
+
+function desenharBancada() {
+
+    noStroke();
+
+    fill(150, 120, 90);
+
+    rect(
+        0,
+        540,
+        width,
+        110
+    );
+
+    fill(125, 95, 70);
+
+    rect(
+        0,
+        540,
+        width,
+        8
+    );
+
+}
+
+
+/* --------------------------------------------------
+   BALANÇA
+-------------------------------------------------- */
+
+function desenharBalanca() {
+
+    const x = 120;
+    const y = 370;
+    const w = 250;
+    const h = 160;
+
+    // corpo
+    fill(220);
+
+    stroke(80);
+
+    strokeWeight(2);
+
+    rect(
+        x,
+        y,
+        w,
+        h,
+        8
+    );
+
+    // prato
+    fill(190);
+
+    rect(
+        x + 25,
+        y - 15,
+        w - 50,
+        18,
+        5
+    );
+
+    // visor
+    fill(35);
+
+    rect(
+        x + 55,
+        y + 40,
+        140,
+        55,
+        5
+    );
+
+    fill(100, 255, 140);
+
+    textAlign(CENTER, CENTER);
+
+    textSize(25);
+
+    if (massaMedida) {
+
+        text(
+            formatar(massaCorpo) + " g",
+            x + 125,
+            y + 68
+        );
+
+    } else {
+
+        text(
+            "0,0 g",
+            x + 125,
+            y + 68
+        );
+
+    }
+
+    fill(70);
+
+    textSize(15);
+
+    text(
+        "BALANÇA DIGITAL",
+        x + 125,
+        y + 125
+    );
+
+}
+
+
+/* --------------------------------------------------
+   PROVETA
+-------------------------------------------------- */
+
+function desenharProveta() {
+
+    const x = 730;
+    const topo = 100;
+    const largura = 110;
+    const fundo = 510;
+
+    // suporte
+    stroke(80);
+
+    strokeWeight(5);
+
+    line(
+        x - 70,
+        510,
+        x + 70,
+        510
+    );
+
+    line(
+        x - 35,
+        510,
+        x - 35,
+        145
+    );
+
+    // proveta
+    strokeWeight(2);
+
+    fill(220, 240, 250, 100);
+
+    rect(
+        x - largura / 2,
+        topo,
+        largura,
+        fundo - topo,
+        8
+    );
+
+    // água
+    let volumeAtual =
+        volumeMedido
+            ? VOLUME_INICIAL + volumeCorpo
+            : VOLUME_INICIAL;
+
+    let alturaAgua =
+        map(
+            volumeAtual,
+            0,
+            100,
+            fundo,
+            topo + 30
+        );
+
+    noStroke();
+
+    fill(80, 160, 220, 150);
+
+    rect(
+        x - largura / 2 + 3,
+        alturaAgua,
+        largura - 6,
+        fundo - alturaAgua - 3,
+        4
+    );
+
+    // escala
+    stroke(60);
+
+    strokeWeight(1);
+
+    textAlign(LEFT, CENTER);
+
+    textSize(12);
+
+    for (
+        let v = 0;
+        v <= 100;
+        v += 10
+    ) {
+
+        let yy =
+            map(
+                v,
+                0,
+                100,
+                fundo,
+                topo + 30
+            );
+
+        line(
+            x + largura / 2,
+            yy,
+            x + largura / 2 + 13,
+            yy
+        );
+
+        noStroke();
+
+        fill(50);
+
+        text(
+            v + " mL",
+            x + largura / 2 + 18,
+            yy
+        );
+
+        stroke(60);
+
+    }
+
+    noStroke();
+
+    fill(50);
+
+    textAlign(CENTER);
+
+    textSize(18);
+
+    text(
+        "PROVETA",
+        x,
+        70
+    );
+
+    textSize(14);
+
+    text(
+        "Água",
+        x,
+        88
+    );
+
+    // volume atual
+    fill(40);
+
+    textSize(16);
+
+    text(
+        volumeAtual + " mL",
+        x,
+        alturaAgua - 12
+    );
+
+}
+
+
+/* --------------------------------------------------
+   CORPO DE PROVA
+-------------------------------------------------- */
+
+function desenharCorpo() {
+
+    let tamanho = 58;
+
+    push();
+
+    translate(
+        corpo.x,
+        corpo.y
+    );
+
+    // corpo metálico
+    fill(145);
+
+    stroke(50);
+
+    strokeWeight(2);
+
+    rect(
+        -tamanho / 2,
+        -tamanho / 2,
+        tamanho,
+        tamanho,
+        8
+    );
+
+    // brilho
+    noStroke();
+
+    fill(210, 210, 210, 100);
+
+    rect(
+        -tamanho / 2 + 8,
+        -tamanho / 2 + 8,
+        10,
+        tamanho - 16,
+        5
+    );
+
+    fill(40);
+
+    textAlign(CENTER, CENTER);
+
+    textSize(14);
+
+    text(
+        "?",
+        0,
+        0
+    );
+
+    pop();
+
+}
+
+
+/* --------------------------------------------------
+   TEXTOS DA SIMULAÇÃO
+-------------------------------------------------- */
+
+function desenharInstrucoesCanvas() {
+
+    fill(50);
+
+    noStroke();
+
+    textAlign(CENTER);
+
+    textSize(15);
+
+    if (corpo.local === "bancada") {
+
+        text(
+            "Arraste o corpo para a BALANÇA ou para a PROVETA.",
+            width / 2,
+            585
+        );
+
+    }
+
+    else if (corpo.local === "balanca") {
+
+        text(
+            "Massa medida. Agora leve o corpo para a proveta.",
+            width / 2,
+            585
+        );
+
+    }
+
+    else if (corpo.local === "proveta") {
+
+        text(
+            "Volume determinado pelo deslocamento da água.",
+            width / 2,
+            585
+        );
+
+    }
+
+}
+
+
+/* --------------------------------------------------
+   INTERAÇÃO COM O MOUSE
+-------------------------------------------------- */
+
+function mousePressed() {
+
+    if (
+        dist(
+            mouseX,
+            mouseY,
+            corpo.x,
+            corpo.y
+        ) < 45
+    ) {
+
+        corpo.arrastando = true;
+
+        corpo.local = "movendo";
+
+    }
+
+}
+
+
+function mouseDragged() {
+
+    if (corpo.arrastando) {
+
+        corpo.x = mouseX;
+
+        corpo.y = mouseY;
+
+    }
+
+}
+
+
+function mouseReleased() {
+
+    if (!corpo.arrastando) {
+        return;
+    }
+
+    corpo.arrastando = false;
+
+    // -----------------------------------------------
+    // BALANÇA
+    // -----------------------------------------------
+
+    if (
+        corpo.x > 100 &&
+        corpo.x < 390 &&
+        corpo.y > 310 &&
+        corpo.y < 410
+    ) {
+
+        corpo.x = 245;
+
+        corpo.y = 345;
+
+        corpo.local = "balanca";
+
+        massaMedida = true;
+
+        document.getElementById(
+            "massa-display"
+        ).textContent =
+            formatar(massaCorpo) + " g";
+
+        document.getElementById(
+            "status"
+        ).className = "resultado sucesso";
+
+        document.getElementById(
+            "status"
+        ).textContent =
+            "Massa medida! Agora leve o corpo para a proveta.";
+
+    }
+
+    // -----------------------------------------------
+    // PROVETA
+    // -----------------------------------------------
+
+    else if (
+        corpo.x > 660 &&
+        corpo.x < 800 &&
+        corpo.y > 100 &&
+        corpo.y < 500
+    ) {
+
+        corpo.x = 785;
+
+        corpo.y = 330;
+
+        corpo.local = "proveta";
+
+        volumeMedido = true;
+
+        let volumeFinal =
+            VOLUME_INICIAL + volumeCorpo;
+
+        document.getElementById(
+            "volume-final-display"
+        ).textContent =
+            volumeFinal + " mL";
+
+        document.getElementById(
+            "volume-deslocado-display"
+        ).textContent =
+            volumeCorpo + " mL";
+
+        document.getElementById(
+            "status"
+        ).className = "resultado sucesso";
+
+        document.getElementById(
+            "status"
+        ).textContent =
+            "Volume determinado pelo deslocamento da água!";
+
+    }
+
+    // -----------------------------------------------
+    // CASO NÃO SEJA NENHUM EQUIPAMENTO
+    // -----------------------------------------------
+
+    else {
+
+        corpo.x = 500;
+
+        corpo.y = 450;
+
+        corpo.local = "bancada";
+
+        document.getElementById(
+            "status"
+        ).className = "resultado info";
+
+        document.getElementById(
+            "status"
+        ).textContent =
+            "Coloque o corpo sobre a balança ou dentro da proveta.";
+
+    }
+
+}
+
+
+/* --------------------------------------------------
+   VERIFICAÇÃO DA IDENTIFICAÇÃO
+-------------------------------------------------- */
+
+document
+    .getElementById("verificar-btn")
+    .addEventListener(
+        "click",
+        verificarIdentificacao
+    );
+
+
+function verificarIdentificacao() {
+
+    if (
+        !massaMedida ||
+        !volumeMedido
+    ) {
+
+        mostrarResultado(
+            "resultado-identificacao",
+            "Antes de identificar o material, realize as duas medições: massa e volume.",
+            "erro"
+        );
+
+        return;
+    }
+
+    let entrada =
+        parseFloat(
+            document
+                .getElementById(
+                    "densidade-input"
+                )
+                .value
+                .replace(",", ".")
+        );
+
+    let selecionado =
+        document
+            .getElementById(
+                "material-select"
+            )
+            .value;
+
+    if (
+        isNaN(entrada) ||
+        entrada <= 0
+    ) {
+
+        mostrarResultado(
+            "resultado-identificacao",
+            "Digite um valor válido para a massa específica.",
+            "erro"
+        );
+
+        return;
+    }
+
+    if (selecionado === "") {
+
+        mostrarResultado(
+            "resultado-identificacao",
+            "Selecione o material que você considera correto.",
+            "erro"
+        );
+
+        return;
+    }
+
+    const erroRelativo =
+        Math.abs(
+            entrada - materialAtual.densidade
+        ) /
+        materialAtual.densidade;
+
+    const calculoCorreto =
+        erroRelativo <= 0.02;
+
+    const materialCorreto =
+        selecionado === materialAtual.nome;
+
+    if (
+        calculoCorreto &&
+        materialCorreto
+    ) {
+
+        identificacaoFeita = true;
+
+        mostrarResultado(
+            "resultado-identificacao",
+            "<strong>Correto!</strong><br>" +
+            "O material é <strong>" +
+            materialAtual.nome +
+            "</strong> (" +
+            materialAtual.simbolo +
+            ").<br><br>" +
+            "Massa específica de referência: " +
+            formatar(materialAtual.densidade) +
+            " g/cm³.",
+            "sucesso"
+        );
+
+        document.getElementById(
+            "registro-material"
+        ).textContent =
+            materialAtual.nome;
+
+        document.getElementById(
+            "registro-densidade"
+        ).textContent =
+            formatar(entrada) +
+            " g/cm³";
+
+        document.getElementById(
+            "registro-volume"
+        ).textContent =
+            volumeCorpo +
+            " cm³";
+
+    }
+
+    else {
+
+        let mensagem =
+            "<strong>Ainda não.</strong><br>";
+
+        if (!calculoCorreto) {
+
+            mensagem +=
+                "Seu cálculo da massa específica não está suficientemente próximo do valor esperado.<br>";
+
+        }
+
+        if (!materialCorreto) {
+
+            mensagem +=
+                "O elemento selecionado não corresponde ao resultado experimental.<br>";
+
+        }
+
+        mensagem +=
+            "<br>Revise a relação " +
+            "<strong>ρ = m / V</strong> " +
+            "e confira o volume obtido pelo deslocamento da água.";
+
+        mostrarResultado(
+            "resultado-identificacao",
+            mensagem,
+            "erro"
+        );
+
+    }
+
+}
+
+
+/* --------------------------------------------------
+   EMPUXO
+-------------------------------------------------- */
+
+document
+    .getElementById("empuxo-btn")
+    .addEventListener(
+        "click",
+        calcularEmpuxo
+    );
+
+
+function calcularEmpuxo() {
+
+    if (
+        !massaMedida ||
+        !volumeMedido
+    ) {
+
+        mostrarResultado(
+            "resultado-empuxo",
+            "Primeiro realize as medições de massa e volume.",
+            "erro"
+        );
+
+        return;
+    }
+
+    /*
+       Massa em kg
+    */
+
+    const massaKg =
+        massaCorpo / 1000;
+
+    /*
+       Volume em m³
+    */
+
+    const volumeM3 =
+        volumeCorpo * 1e-6;
+
+    const g = 10;
+
+    const rhoAgua = 1000;
+
+    const peso =
+        massaKg * g;
+
+    const empuxo =
+        rhoAgua *
+        g *
+        volumeM3;
+
+    const resultante =
+        empuxo - peso;
+
+    let comportamento;
+
+    if (
+        Math.abs(resultante) < 0.000001
+    ) {
+
+        comportamento =
+            "equilíbrio";
+
+    }
+
+    else if (
+        resultante > 0
+    ) {
+
+        comportamento =
+            "tende a subir";
+
+    }
+
+    else {
+
+        comportamento =
+            "afunda";
+
+    }
+
+    document.getElementById(
+        "peso-display"
+    ).textContent =
+        formatar(peso, 3) +
+        " N";
+
+    document.getElementById(
+        "empuxo-display"
+    ).textContent =
+        formatar(empuxo, 3) +
+        " N";
+
+    document.getElementById(
+        "resultante-display"
+    ).textContent =
+        formatar(Math.abs(resultante), 3) +
+        " N";
+
+    document.getElementById(
+        "comportamento-display"
+    ).textContent =
+        comportamento;
+
+    document.getElementById(
+        "registro-empuxo"
+    ).textContent =
+        formatar(empuxo, 3) +
+        " N";
+
+    let texto =
+        "<strong>Resultado:</strong><br><br>" +
+
+        "Peso: " +
+        formatar(peso, 3) +
+        " N<br>" +
+
+        "Empuxo: " +
+        formatar(empuxo, 3) +
+        " N<br>" +
+
+        "Força resultante: " +
+        formatar(Math.abs(resultante), 3) +
+        " N<br><br>";
+
+    if (comportamento === "afunda") {
+
+        texto +=
+            "Como <strong>P &gt; E</strong>, " +
+            "a força resultante aponta para baixo. " +
+            "O corpo afunda.";
+
+    }
+
+    else if (
+        comportamento === "tende a subir"
+    ) {
+
+        texto +=
+            "Como <strong>E &gt; P</strong>, " +
+            "a força resultante aponta para cima. " +
+            "O corpo tende a subir.";
+
+    }
+
+    else {
+
+        texto +=
+            "Como <strong>E = P</strong>, " +
+            "a força resultante é nula.";
+
+    }
+
+    mostrarResultado(
+        "resultado-empuxo",
+        texto,
+        "info"
+    );
+
+}
+
+
+/* --------------------------------------------------
+   FUNÇÕES AUXILIARES
+-------------------------------------------------- */
+
+function mostrarResultado(
+    id,
+    texto,
+    classe
+) {
+
+    const elemento =
+        document.getElementById(id);
+
+    elemento.className =
+        "resultado " + classe;
+
+    elemento.innerHTML =
+        texto;
+
+}
+
+
+function formatar(
+    valor,
+    casas = 2
+) {
+
+    return Number(valor)
+        .toFixed(casas)
+        .replace(".", ",");
+
+}
+
+
+/* --------------------------------------------------
+   BOTÃO NOVO EXPERIMENTO
+-------------------------------------------------- */
+
+document
+    .getElementById("novo-btn")
+    .addEventListener(
+        "click",
+        iniciarExperimento
+    );
+
+
+/* --------------------------------------------------
+   PREENCHIMENTO DAS OPÇÕES
+-------------------------------------------------- */
+
+function preencherMateriais() {
+
+    const select =
+        document.getElementById(
+            "material-select"
+        );
+
+    materiais.forEach(
+        material => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                material.nome;
+
+            option.textContent =
+                material.nome;
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+}
+
+preencherMateriais();
+
+</script>
+
+</body>
+</html>
